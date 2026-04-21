@@ -194,23 +194,21 @@ function calcTax(taxable, cfg, applyLoonheffingskorting = true) {
 function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek = 40, applyLoonheffingskorting = true }) {
   const cfg = TAX_CONFIG[parseInt(year)];
   const fte = hoursPerWeek / 40;
-  const brutoFTE = brutoJaar * fte;
-  const brutoTaxable = brutoFTE * (ruling30 ? 0.70 : 1.0);
 
-  // Vakantiegeld and 13e maand calculated on base bruto (before ruling30)
-  const vakantiegeld = includeVakantie ? brutoFTE * 0.08 : 0;
-  const dertiendeMaand = include13th ? brutoFTE / 12 : 0;
-  const pensioenbedrag = Math.round(brutoFTE * (pensioenpremie / 100));
+  // brutoJaar is the ACTUAL salary for this FTE (already scaled)
+  // e.g. if full-time is €60k and FTE=0.5, brutoJaar should be €30k
+  const brutoTaxable = brutoJaar * (ruling30 ? 0.70 : 1.0);
+  const vakantiegeld = includeVakantie ? brutoJaar * 0.08 : 0;
+  const dertiendeMaand = include13th ? brutoJaar / 12 : 0;
+  const pensioenbedrag = Math.round(brutoJaar * (pensioenpremie / 100));
   const bijtelling = leaseWaarde > 0 ? Math.round(leaseWaarde * (leaseType === "elektrisch" ? cfg.lease_bijtelling_elektrisch : cfg.lease_bijtelling_overig)) : 0;
 
-  // Total bruto for tax purposes (base + extras)
   const totalBruto = brutoTaxable + vakantiegeld + dertiendeMaand;
   const taxableIncome = Math.max(0, totalBruto - pensioenbedrag + bijtelling);
 
   const tax = calcTax(taxableIncome, cfg, applyLoonheffingskorting);
   const zvw = Math.round(Math.min(totalBruto, cfg.zvwMax) * cfg.zvwEmployee);
 
-  // Reiskosten scaled to FTE
   const maxDays = Math.round(cfg.reiskosten_max_days * fte);
   const effectiveDays = Math.min(reiskostenDagen, maxDays);
   const reiskostenJaar = Math.round(reiskostenKm * 2 * effectiveDays * cfg.reiskosten_per_km);
@@ -220,7 +218,7 @@ function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenp
   const workingDays = Math.round(cfg.reiskosten_max_days * fte);
 
   return {
-    brutoJaar: brutoFTE,
+    brutoJaar,
     totalBruto,
     vakantiegeld,
     dertiendeMaand,
@@ -257,13 +255,11 @@ function calcZZP({ winst, year, uurtarief, uurPerWeek, applyLoonheffingskorting 
   };
 }
 
-// Reverse calculation: binary search for bruto that yields target netto
+// Reverse calculation: binary search for actual (FTE-adjusted) bruto that yields target netto
 function calcBrutoFromNetto({ nettoJaarTarget, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting }) {
-  const fte = hoursPerWeek / 40;
-  // Scale search range by FTE -- at lower FTE the full-time equivalent bruto is higher relative to netto
-  const scale = fte > 0 ? fte : 1;
-  let lo = (nettoJaarTarget / scale) * 0.5;
-  let hi = (nettoJaarTarget / scale) * 6;
+  // Search for the actual bruto (already FTE-adjusted) that produces the target netto
+  let lo = nettoJaarTarget * 0.5;
+  let hi = nettoJaarTarget * 5;
   for (let i = 0; i < 120; i++) {
     const mid = (lo + hi) / 2;
     const res = calcEmployee({ brutoJaar: mid, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting });
@@ -415,7 +411,8 @@ export default function App() {
     if (direction === "bruto") {
       const jaarBruto = getJaarBruto();
       if (jaarBruto <= 0) { setResult(null); return; }
-      setResult(calcEmployee({ brutoJaar: jaarBruto, ...employeeParams }));
+      // User enters full-time equivalent bruto -- scale by FTE for actual salary
+      setResult(calcEmployee({ brutoJaar: jaarBruto * fte, ...employeeParams }));
     } else {
       const nettoTarget = getNettoTarget();
       if (nettoTarget <= 0) { setResult(null); return; }
@@ -428,7 +425,7 @@ export default function App() {
     if (mode === "zzp") {
       setCompareResult(calcZZP({ winst: result.winst, year: otherYear, uurtarief, uurPerWeek, applyLoonheffingskorting }));
     } else {
-      setCompareResult(calcEmployee({ brutoJaar: result.brutoJaar / fte, ...{ ...employeeParams, year: otherYear } }));
+      setCompareResult(calcEmployee({ brutoJaar: result.brutoJaar, ...{ ...employeeParams, year: otherYear } }));
     }
   }, [showCompare, result, otherYear]);
 
@@ -610,12 +607,7 @@ export default function App() {
               <Toggle label={t.holidayPay} on={includeVakantie} onClick={() => setIncludeVakantie(!includeVakantie)} />
               <Toggle label={t.thirteenth} on={include13th} onClick={() => setInclude13th(!include13th)} />
               <Toggle label={t.ruling30} on={ruling30} onClick={() => setRuling30(!ruling30)} info={t.ruling30Info} />
-              <Toggle
-                label={t.loonheffingskorting}
-                on={applyLoonheffingskorting}
-                onClick={() => setApplyLoonheffingskorting(!applyLoonheffingskorting)}
-                info={t.loonheffingskortingInfo}
-              />
+              <Toggle label={t.loonheffingskorting} on={applyLoonheffingskorting} onClick={() => setApplyLoonheffingskorting(!applyLoonheffingskorting)} info={t.loonheffingskortingInfo} />
             </div>
 
             <button className="expand-btn" onClick={() => setShowAdvanced(!showAdvanced)}>
