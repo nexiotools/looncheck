@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // ════════════════════════════════════════════════════════════════════════════
 // TAX CONFIG — to add a new year: copy a year block, change the key,
@@ -42,15 +42,16 @@ const T = {
     sub: "Bereken je nettoloon inclusief vakantiegeld, pensioen, reiskosten en meer. Voor werknemers én ZZP'ers.",
     iAmA: "Ik ben een", employee: "👔 Werknemer", zzp: "💼 ZZP / Ondernemer",
     taxYear: "Belastingjaar",
+    calcDirection: "Berekening",
     directionBrutoNetto: "Bruto → Netto", directionNettoBruto: "Netto → Bruto",
     grossSalary: "Brutosalaris", zzpProfit: "Jaarwinst (voor aftrek)",
     netSalaryInput: "Gewenst nettosalaris",
     perYear: "Per jaar", perMonth: "Per maand",
     hoursWeekLabel: "Werkweek & FTE",
-    hoursPerWeekLabel: "Uren per week", fteLabel: "FTE",
-    fteHint: (fte) => `${(fte * 100).toFixed(0)}% van fulltime`,
     extras: "Extra's meenemen",
     holidayPay: "Vakantiegeld (8%)", thirteenth: "13e maand", ruling30: "30% ruling",
+    loonheffingskorting: "Loonheffingskorting",
+    loonheffingskortingInfo: "De loonheffingskorting verlaagt je belasting. Je mag dit slechts bij één werkgever tegelijk toepassen. Bij een tweede baan of uitkering zet je dit uit.",
     ruling30Info: "30% van het brutoloon is belastingvrij als kostenvergoeding. Alleen voor expats met een geldige beschikking.",
     advancedToggle: "Pensioen, reiskosten & lease auto",
     pensionLabel: "Pensioenpremie werknemer", pensionSuffix: "% van bruto", pensionHint: "Gemiddeld 4-8% in NL",
@@ -68,13 +69,14 @@ const T = {
     netHourly: "Netto uurtarief", fromRate: (r) => `van je €${r} tarief`,
     fteInsight: "FTE", fteInsightHint: (fte, h) => `${h} uur/week · ${(fte*100).toFixed(0)}% fulltime`,
     grossSalaryLabel: "Bruto salaris", grossProfit: "Bruto winst",
-    holidayPayLabel: "Vakantiegeld (8%)", thirteenthLabel: "13e maand",
+    holidayPayLabel: "Vakantiegeld (8%)", thirteenthLabel: "13e maand (eenmalig)",
     selfEmployedDeduction: "Zelfstandigenaftrek", mkbLabel: "MKB-winstvrijstelling",
     taxableIncome: "Belastbaar inkomen", pensionDeduction: "Pensioenpremie",
     leaseBijtelling: "Lease bijtelling", grossTax: "Inkomstenbelasting (bruto)",
     generalCredit: "Algemene heffingskorting", employmentCredit: "Arbeidskorting",
+    loonheffingskortingLabel: "Loonheffingskorting",
     netTax: "Te betalen IB (netto)", travelAllowance: "Reiskostenvergoeding",
-    holidayOnce: "Vakantiegeld (eenmalig)", thirteenthOnce: "13e maand (eenmalig)",
+    holidayOnce: "Vakantiegeld (eenmalig)",
     reversedBruto: "Benodigde brutosalaris",
     reversedNote: "Dit is het brutosalaris dat resulteert in het door jou ingevoerde nettosalaris.",
     zzpNote: "⚠️ Let op: Als ZZP'er betaal je ook premies voor arbeidsongeschiktheid (AOV) zelf. Houd rekening met ~€150–300/maand. Pensioenopbouw is ook eigen verantwoordelijkheid.",
@@ -96,15 +98,16 @@ const T = {
     sub: "Calculate your net salary including holiday pay, pension, travel and more. For employees and freelancers.",
     iAmA: "I am a", employee: "👔 Employee", zzp: "💼 Freelancer / Self-employed",
     taxYear: "Tax year",
+    calcDirection: "Calculation",
     directionBrutoNetto: "Gross → Net", directionNettoBruto: "Net → Gross",
     grossSalary: "Gross salary", zzpProfit: "Annual profit (before deductions)",
     netSalaryInput: "Desired net salary",
     perYear: "Per year", perMonth: "Per month",
     hoursWeekLabel: "Work week & FTE",
-    hoursPerWeekLabel: "Hours per week", fteLabel: "FTE",
-    fteHint: (fte) => `${(fte * 100).toFixed(0)}% of full-time`,
     extras: "Include extras",
     holidayPay: "Holiday pay (8%)", thirteenth: "13th month bonus", ruling30: "30% ruling",
+    loonheffingskorting: "Tax credit (loonheffingskorting)",
+    loonheffingskortingInfo: "The tax credit reduces your income tax. You may only apply this at one employer at a time. Turn it off for a second job or benefit.",
     ruling30Info: "30% of gross salary is tax-free as expense allowance. Only for expats with a valid ruling.",
     advancedToggle: "Pension, travel & company car",
     pensionLabel: "Employee pension contribution", pensionSuffix: "% of gross", pensionHint: "Average 4-8% in NL",
@@ -122,13 +125,14 @@ const T = {
     netHourly: "Net hourly rate", fromRate: (r) => `from your €${r} rate`,
     fteInsight: "FTE", fteInsightHint: (fte, h) => `${h} hrs/week · ${(fte*100).toFixed(0)}% full-time`,
     grossSalaryLabel: "Gross salary", grossProfit: "Gross profit",
-    holidayPayLabel: "Holiday pay (8%)", thirteenthLabel: "13th month bonus",
+    holidayPayLabel: "Holiday pay (8%)", thirteenthLabel: "13th month (one-time)",
     selfEmployedDeduction: "Self-employed deduction", mkbLabel: "SME profit exemption",
     taxableIncome: "Taxable income", pensionDeduction: "Pension contribution",
     leaseBijtelling: "Company car addition", grossTax: "Income tax (gross)",
     generalCredit: "General tax credit", employmentCredit: "Employment tax credit",
+    loonheffingskortingLabel: "Tax credit applied",
     netTax: "Income tax (net)", travelAllowance: "Travel allowance",
-    holidayOnce: "Holiday pay (one-time)", thirteenthOnce: "13th month (one-time)",
+    holidayOnce: "Holiday pay (one-time)",
     reversedBruto: "Required gross salary",
     reversedNote: "This is the gross salary that results in your entered net salary.",
     zzpNote: "⚠️ Note: As a freelancer you also pay disability insurance (AOV) yourself. Budget ~€150–300/month. Pension savings are also your own responsibility.",
@@ -175,10 +179,10 @@ function calcBracketTax(taxable, cfg) {
   }
   return tax;
 }
-function calcTax(taxable, cfg) {
+function calcTax(taxable, cfg, applyLoonheffingskorting = true) {
   const bracketTax = calcBracketTax(taxable, cfg);
-  const ahk = calcAHK(taxable, cfg);
-  const ak = calcArbeidskorting(taxable, cfg);
+  const ahk = applyLoonheffingskorting ? calcAHK(taxable, cfg) : 0;
+  const ak = applyLoonheffingskorting ? calcArbeidskorting(taxable, cfg) : 0;
   return {
     bracketTax: Math.round(bracketTax),
     ahk: Math.round(ahk),
@@ -187,41 +191,60 @@ function calcTax(taxable, cfg) {
   };
 }
 
-function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek = 40 }) {
+function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek = 40, applyLoonheffingskorting = true }) {
   const cfg = TAX_CONFIG[parseInt(year)];
   const fte = hoursPerWeek / 40;
-  // Scale bruto by FTE -- user always enters full-time equivalent, we scale down
   const brutoFTE = brutoJaar * fte;
   const brutoTaxable = brutoFTE * (ruling30 ? 0.70 : 1.0);
+
+  // Vakantiegeld and 13e maand calculated on base bruto (before ruling30)
   const vakantiegeld = includeVakantie ? brutoFTE * 0.08 : 0;
   const dertiendeMaand = include13th ? brutoFTE / 12 : 0;
   const pensioenbedrag = Math.round(brutoFTE * (pensioenpremie / 100));
   const bijtelling = leaseWaarde > 0 ? Math.round(leaseWaarde * (leaseType === "elektrisch" ? cfg.lease_bijtelling_elektrisch : cfg.lease_bijtelling_overig)) : 0;
+
+  // Total bruto for tax purposes (base + extras)
   const totalBruto = brutoTaxable + vakantiegeld + dertiendeMaand;
   const taxableIncome = Math.max(0, totalBruto - pensioenbedrag + bijtelling);
-  const tax = calcTax(taxableIncome, cfg);
+
+  const tax = calcTax(taxableIncome, cfg, applyLoonheffingskorting);
   const zvw = Math.round(Math.min(totalBruto, cfg.zvwMax) * cfg.zvwEmployee);
-  const workingDays = Math.round(cfg.reiskosten_max_days * fte);
-  const reiskostenJaar = Math.round(Math.min(reiskostenKm * 2 * reiskostenDagen, reiskostenKm * 2 * workingDays) * cfg.reiskosten_per_km);
+
+  // Reiskosten scaled to FTE
+  const maxDays = Math.round(cfg.reiskosten_max_days * fte);
+  const effectiveDays = Math.min(reiskostenDagen, maxDays);
+  const reiskostenJaar = Math.round(reiskostenKm * 2 * effectiveDays * cfg.reiskosten_per_km);
+
   const nettoJaar = totalBruto - tax.inkomstenbelasting - zvw - pensioenbedrag + reiskostenJaar;
   const annualHours = hoursPerWeek * 52;
+  const workingDays = Math.round(cfg.reiskosten_max_days * fte);
+
   return {
-    brutoJaar: brutoFTE, totalBruto, vakantiegeld, dertiendeMaand, pensioenbedrag, bijtelling, reiskostenJaar,
-    ...tax, zvw,
-    nettoJaar: Math.round(nettoJaar), nettoMaand: Math.round(nettoJaar / 12),
+    brutoJaar: brutoFTE,
+    totalBruto,
+    vakantiegeld,
+    dertiendeMaand,
+    pensioenbedrag,
+    bijtelling,
+    reiskostenJaar,
+    ...tax,
+    zvw,
+    nettoJaar: Math.round(nettoJaar),
+    nettoMaand: Math.round(nettoJaar / 12),
     nettoPerUur: annualHours > 0 ? Math.round((nettoJaar / annualHours) * 100) / 100 : 0,
-    nettoPerDag: Math.round(nettoJaar / Math.round(cfg.reiskosten_max_days * fte)),
+    nettoPerDag: workingDays > 0 ? Math.round(nettoJaar / workingDays) : 0,
     fte,
+    workingDays,
     effectiveRate: totalBruto > 0 ? ((tax.inkomstenbelasting + zvw) / totalBruto * 100).toFixed(1) : 0,
   };
 }
 
-function calcZZP({ winst, year, uurtarief, uurPerWeek }) {
+function calcZZP({ winst, year, uurtarief, uurPerWeek, applyLoonheffingskorting = true }) {
   const cfg = TAX_CONFIG[parseInt(year)];
   const naZelfstandigen = Math.max(0, winst - cfg.zelfstandigenaftrek);
   const mkbBedrag = Math.round(naZelfstandigen * cfg.mkbVrijstelling);
   const taxable = Math.max(0, naZelfstandigen - mkbBedrag);
-  const tax = calcTax(taxable, cfg);
+  const tax = calcTax(taxable, cfg, applyLoonheffingskorting);
   const zvw = Math.round(Math.min(taxable, cfg.zvwMax) * cfg.zvwZZP);
   const nettoJaar = winst - tax.inkomstenbelasting - zvw;
   const annualHours = (uurPerWeek || 40) * 52;
@@ -234,17 +257,20 @@ function calcZZP({ winst, year, uurtarief, uurPerWeek }) {
   };
 }
 
-// ── Reverse calculation: binary search bruto that yields target netto ─────
-function calcBrutoFromNetto({ nettoJaarTarget, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek }) {
-  let lo = nettoJaarTarget * 0.8, hi = nettoJaarTarget * 3;
-  for (let i = 0; i < 60; i++) {
+// Reverse calculation: binary search for bruto that yields target netto
+function calcBrutoFromNetto({ nettoJaarTarget, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting }) {
+  const fte = hoursPerWeek / 40;
+  // Scale search range by FTE -- at lower FTE the full-time equivalent bruto is higher relative to netto
+  const scale = fte > 0 ? fte : 1;
+  let lo = (nettoJaarTarget / scale) * 0.5;
+  let hi = (nettoJaarTarget / scale) * 6;
+  for (let i = 0; i < 120; i++) {
     const mid = (lo + hi) / 2;
-    const res = calcEmployee({ brutoJaar: mid / (hoursPerWeek / 40), year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek });
+    const res = calcEmployee({ brutoJaar: mid, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting });
     if (res.nettoJaar < nettoJaarTarget) lo = mid; else hi = mid;
-    if (Math.abs(hi - lo) < 1) break;
+    if (Math.abs(hi - lo) < 0.5) break;
   }
-  const brutoFTE = (lo + hi) / 2 / (hoursPerWeek / 40);
-  return calcEmployee({ brutoJaar: brutoFTE, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek });
+  return calcEmployee({ brutoJaar: (lo + hi) / 2, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting });
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -266,20 +292,62 @@ function Bar({ label, value, total, color, sublabel }) {
     </div>
   );
 }
-function Toggle({ label, on, onClick }) {
+
+function Toggle({ label, on, onClick, info }) {
+  const [showInfo, setShowInfo] = useState(false);
   return (
-    <label className={`toggle${on ? " on" : ""}`} onClick={onClick}>
-      <span className="toggle-box">{on ? "✓" : ""}</span>{label}
-    </label>
+    <div style={{ position: "relative" }}>
+      <label className={`toggle${on ? " on" : ""}`} onClick={onClick} style={{ cursor: "pointer" }}>
+        <span className="toggle-box">{on ? "✓" : ""}</span>
+        {label}
+        {info && (
+          <span
+            onClick={e => { e.stopPropagation(); setShowInfo(!showInfo); }}
+            style={{ marginLeft: 4, width: 14, height: 14, borderRadius: "50%", background: on ? "rgba(255,255,255,0.3)" : "#e8e4de", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, cursor: "help", color: on ? "#fff" : "#888", flexShrink: 0 }}
+          >i</span>
+        )}
+      </label>
+      {showInfo && info && (
+        <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 10, background: "#fff", border: "1px solid #e8e4de", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#444", lineHeight: 1.6, maxWidth: 260, marginTop: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}>
+          {info}
+          <button onClick={() => setShowInfo(false)} style={{ display: "block", marginTop: 6, background: "transparent", border: "none", color: "#aaa", fontSize: 11, cursor: "pointer", padding: 0 }}>✕ Sluiten</button>
+        </div>
+      )}
+    </div>
   );
 }
+
 function NumInput({ label, value, onChange, suffix, min = 0, max, step = 1, hint }) {
+  const [raw, setRaw] = useState(String(value));
+
+  useEffect(() => {
+    // Sync if parent value changes externally
+    if (parseFloat(raw) !== value && raw !== "") setRaw(String(value));
+  }, [value]);
+
+  const handleChange = (e) => {
+    const v = e.target.value;
+    setRaw(v);
+    const parsed = parseFloat(v);
+    if (!isNaN(parsed)) onChange(parsed);
+    else if (v === "" || v === "-") onChange(0);
+  };
+
+  const handleBlur = () => {
+    const parsed = parseFloat(raw);
+    if (isNaN(parsed) || raw === "") { setRaw("0"); onChange(0); }
+    else { setRaw(String(parsed)); }
+  };
+
   return (
     <div style={{ background: "#f9f8f6", borderRadius: 10, padding: "10px 14px", flex: 1, minWidth: 120 }}>
       <div style={{ fontSize: 11, color: "#aaa", fontWeight: 500, marginBottom: 4 }}>{label}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-        <input type="number" value={value} min={min} max={max} step={step} onChange={e => onChange(parseFloat(e.target.value) || 0)}
-          style={{ background: "transparent", border: "none", outline: "none", fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: "#1a1a1a", width: "100%", padding: 0 }} />
+        <input
+          type="text" inputMode="numeric" value={raw}
+          onChange={handleChange} onBlur={handleBlur}
+          style={{ background: "transparent", border: "none", outline: "none", fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 700, color: "#1a1a1a", width: "100%", padding: 0 }}
+        />
         {suffix && <span style={{ fontSize: 12, color: "#aaa", whiteSpace: "nowrap" }}>{suffix}</span>}
       </div>
       {hint && <div style={{ fontSize: 10, color: "#bbb", marginTop: 2 }}>{hint}</div>}
@@ -294,12 +362,12 @@ export default function App() {
   const [lang, setLang] = useState("nl");
   const t = T[lang];
 
-  const [mode, setMode] = useState("employee");        // employee | zzp
-  const [direction, setDirection] = useState("bruto"); // bruto | netto (reverse)
+  const [mode, setMode] = useState("employee");
+  const [direction, setDirection] = useState("bruto");
   const [year, setYear] = useState("2026");
-  const [bruto, setBruto] = useState("60000");
+  const [bruto, setBruto] = useState("5000");
   const [nettoInput, setNettoInput] = useState("3500");
-  const [inputMode, setInputMode] = useState("jaar");
+  const [inputMode, setInputMode] = useState("maand");
   const [hoursPerWeek, setHoursPerWeek] = useState(40);
 
   const [includeVakantie, setIncludeVakantie] = useState(true);
@@ -310,6 +378,7 @@ export default function App() {
   const [leaseWaarde, setLeaseWaarde] = useState(0);
   const [leaseType, setLeaseType] = useState("overig");
   const [ruling30, setRuling30] = useState(false);
+  const [applyLoonheffingskorting, setApplyLoonheffingskorting] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const [uurtarief, setUurtarief] = useState(0);
@@ -321,25 +390,26 @@ export default function App() {
   const [copied, setCopied] = useState(false);
 
   const fte = hoursPerWeek / 40;
-  const workingDaysScaled = Math.round(214 * fte);
+  const workingDaysScaled = result?.workingDays || Math.round(214 * fte);
+  const cfg = TAX_CONFIG[parseInt(year)];
+  const otherYear = year === "2026" ? "2025" : "2026";
+
+  const employeeParams = { year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting };
 
   const getJaarBruto = () => {
     const val = parseFloat(bruto.replace(/\./g, "").replace(",", ".")) || 0;
     return inputMode === "maand" ? val * 12 : val;
   };
-
   const getNettoTarget = () => {
     const val = parseFloat(nettoInput.replace(/\./g, "").replace(",", ".")) || 0;
     return inputMode === "maand" ? val * 12 : val;
   };
 
-  const employeeParams = { year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek };
-
   useEffect(() => {
     if (mode === "zzp") {
       const winst = getJaarBruto();
       if (winst <= 0) { setResult(null); return; }
-      setResult(calcZZP({ winst, year, uurtarief, uurPerWeek }));
+      setResult(calcZZP({ winst, year, uurtarief, uurPerWeek, applyLoonheffingskorting }));
       return;
     }
     if (direction === "bruto") {
@@ -351,22 +421,19 @@ export default function App() {
       if (nettoTarget <= 0) { setResult(null); return; }
       setResult(calcBrutoFromNetto({ nettoJaarTarget: nettoTarget, ...employeeParams }));
     }
-  }, [mode, direction, year, bruto, nettoInput, inputMode, hoursPerWeek, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, uurtarief, uurPerWeek]);
+  }, [mode, direction, year, bruto, nettoInput, inputMode, hoursPerWeek, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, applyLoonheffingskorting, uurtarief, uurPerWeek]);
 
   useEffect(() => {
     if (!showCompare || !result) return;
-    const otherYear = year === "2026" ? "2025" : "2026";
     if (mode === "zzp") {
-      setCompareResult(calcZZP({ winst: result.winst, year: otherYear, uurtarief, uurPerWeek }));
+      setCompareResult(calcZZP({ winst: result.winst, year: otherYear, uurtarief, uurPerWeek, applyLoonheffingskorting }));
     } else {
       setCompareResult(calcEmployee({ brutoJaar: result.brutoJaar / fte, ...{ ...employeeParams, year: otherYear } }));
     }
-  }, [showCompare, result]);
+  }, [showCompare, result, otherYear]);
 
   const displayBruto = bruto ? parseInt(bruto.replace(/\./g, "")).toLocaleString("nl-NL") : "";
   const displayNetto = nettoInput ? parseInt(nettoInput.replace(/\./g, "")).toLocaleString("nl-NL") : "";
-  const otherYear = year === "2026" ? "2025" : "2026";
-  const cfg = TAX_CONFIG[parseInt(year)];
 
   return (
     <div style={{ minHeight: "100vh", background: "#fafaf8", fontFamily: "'DM Sans', sans-serif", color: "#1a1a1a" }}>
@@ -392,10 +459,8 @@ export default function App() {
         .main-input { width: 100%; background: #f9f8f6; border: 1px solid #ebebeb; border-radius: 10px; padding: 13px 14px 13px 30px; font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: #1a1a1a; outline: none; transition: border-color 0.2s; }
         .main-input:focus { border-color: #1a1a1a; background: #fff; }
         .main-input::placeholder { color: #ccc; }
-        .main-input.reverse { border-color: #bae6fd; background: #f0f9ff; }
-        .main-input.reverse:focus { border-color: #0369a1; }
-        .fte-bar { height: 6px; background: #f0ede8; border-radius: 3; margin-top: 10px; overflow: hidden; }
-        .fte-fill { height: 100%; background: #1a1a1a; border-radius: 3; transition: width 0.3s ease; }
+        .main-input.reverse { border-color: #ebebeb; background: #f9f8f6; }
+        .main-input.reverse:focus { border-color: #1a1a1a; background: #fff; }
         .toggle-row { display: flex; gap: 8px; flex-wrap: wrap; }
         .toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 9px 12px; border-radius: 8px; border: 1px solid #ebebeb; background: #fff; font-size: 13px; color: #666; transition: all 0.18s; user-select: none; }
         .toggle.on { border-color: #1a1a1a; background: #1a1a1a; color: #fff; }
@@ -425,8 +490,8 @@ export default function App() {
         .ic-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
         .ic-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #1a1a1a; }
         .ic-sub { font-size: 10px; color: #9ca3af; margin-top: 1px; }
-        .reverse-banner { background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
-        .reverse-bruto { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #0369a1; }
+        .reverse-banner { background: #f9f8f6; border: 1px solid #ebebeb; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+        .reverse-bruto { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: #1a1a1a; }
         .compare-block { margin-top: 10px; background: #f9f8f6; border-radius: 12px; padding: 14px 16px; }
         .compare-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 0.8fr; align-items: center; padding: 7px 0; border-bottom: 1px solid #ebebeb; gap: 4px; }
         .compare-row:last-child { border-bottom: none; }
@@ -434,10 +499,6 @@ export default function App() {
         .compare-diff { font-size: 11px; font-weight: 700; text-align: right; }
         .compare-diff.pos { color: #22c55e; }
         .compare-diff.neg { color: #ef4444; }
-        .extras-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .extra-chip { background: #f9f8f6; border-radius: 8px; padding: 10px 14px; flex: 1; min-width: 120px; }
-        .ec-label { font-size: 11px; color: #aaa; font-weight: 500; margin-bottom: 2px; }
-        .ec-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #1a1a1a; }
         .zzp-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; margin-top: 10px; font-size: 12px; color: #92400e; line-height: 1.6; }
         .copy-btn { display: flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #ebebeb; color: #aaa; border-radius: 8px; padding: 8px 14px; font-family: 'DM Sans', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.2s; margin-top: 14px; }
         .copy-btn:hover { border-color: #1a1a1a; color: #1a1a1a; }
@@ -467,16 +528,14 @@ export default function App() {
         </div>
 
         {/* Ad top */}
-        <div className="ad-placeholder" style={{ marginBottom: 10 }}>
-          {t.adLabel}
-        </div>
+        <div className="ad-placeholder" style={{ marginBottom: 10 }}>{t.adLabel}</div>
 
         {/* Mode + Year */}
         <div className="card" style={{ animationDelay: "0.05s" }}>
           <div className="field-label" style={{ marginBottom: 10 }}>{t.iAmA}</div>
           <div className="seg" style={{ marginBottom: 14 }}>
-            <button className={`seg-btn${mode === "employee" ? " active" : ""}`} onClick={() => setMode("employee")}>{t.employee}</button>
-            <button className={`seg-btn${mode === "zzp" ? " active" : ""}`} onClick={() => setMode("zzp")}>{t.zzp}</button>
+            <button className={`seg-btn${mode === "employee" ? " active" : ""}`} onClick={() => { setMode("employee"); setInputMode("maand"); }}>{t.employee}</button>
+            <button className={`seg-btn${mode === "zzp" ? " active" : ""}`} onClick={() => { setMode("zzp"); setInputMode("maand"); }}>{t.zzp}</button>
           </div>
           <div className="field-label">{t.taxYear}</div>
           <div className="seg">
@@ -487,13 +546,12 @@ export default function App() {
 
         {/* Salary input */}
         <div className="card" style={{ animationDelay: "0.1s" }}>
-          {/* Direction toggle -- only for employee */}
           {mode === "employee" && (
             <>
-              <div className="field-label" style={{ marginBottom: 8 }}>Berekening</div>
+              <div className="field-label" style={{ marginBottom: 8 }}>{t.calcDirection}</div>
               <div className="seg" style={{ marginBottom: 14 }}>
-                <button className={`seg-btn${direction === "bruto" ? " active" : ""}`} onClick={() => setDirection("bruto")}>{t.directionBrutoNetto}</button>
-                <button className={`seg-btn${direction === "netto" ? " active" : ""}`} onClick={() => setDirection("netto")}>{t.directionNettoBruto}</button>
+                <button className={`seg-btn${direction === "bruto" ? " active" : ""}`} onClick={() => { setDirection("bruto"); setInputMode("maand"); }}>{t.directionBrutoNetto}</button>
+                <button className={`seg-btn${direction === "netto" ? " active" : ""}`} onClick={() => { setDirection("netto"); setInputMode("maand"); }}>{t.directionNettoBruto}</button>
               </div>
             </>
           )}
@@ -528,11 +586,9 @@ export default function App() {
               <div className="field-label" style={{ marginBottom: 8 }}>{t.hoursWeekLabel}</div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 <div style={{ flex: 1 }}>
-                  <input
-                    type="range" min={4} max={40} step={4} value={hoursPerWeek}
+                  <input type="range" min={4} max={40} step={4} value={hoursPerWeek}
                     onChange={e => setHoursPerWeek(parseInt(e.target.value))}
-                    style={{ width: "100%", accentColor: "#1a1a1a" }}
-                  />
+                    style={{ width: "100%", accentColor: "#1a1a1a" }} />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#bbb", marginTop: 2 }}>
                     <span>4u</span><span>8u</span><span>16u</span><span>24u</span><span>32u</span><span>40u</span>
                   </div>
@@ -553,16 +609,19 @@ export default function App() {
             <div className="toggle-row">
               <Toggle label={t.holidayPay} on={includeVakantie} onClick={() => setIncludeVakantie(!includeVakantie)} />
               <Toggle label={t.thirteenth} on={include13th} onClick={() => setInclude13th(!include13th)} />
-              <Toggle label={t.ruling30} on={ruling30} onClick={() => setRuling30(!ruling30)} />
+              <Toggle label={t.ruling30} on={ruling30} onClick={() => setRuling30(!ruling30)} info={t.ruling30Info} />
+              <Toggle
+                label={t.loonheffingskorting}
+                on={applyLoonheffingskorting}
+                onClick={() => setApplyLoonheffingskorting(!applyLoonheffingskorting)}
+                info={t.loonheffingskortingInfo}
+              />
             </div>
-            {ruling30 && (
-              <div style={{ marginTop: 10, padding: "10px 14px", background: "#f0f9ff", border: "1px solid #bae6fd", borderRadius: 8, fontSize: 12, color: "#0369a1" }}>
-                ℹ️ {t.ruling30Info}
-              </div>
-            )}
+
             <button className="expand-btn" onClick={() => setShowAdvanced(!showAdvanced)}>
               {showAdvanced ? "▲" : "▼"} {t.advancedToggle}
             </button>
+
             {showAdvanced && (
               <>
                 <div style={{ marginTop: 12 }}>
@@ -601,6 +660,15 @@ export default function App() {
         {/* ZZP extras */}
         {mode === "zzp" && (
           <div className="card" style={{ animationDelay: "0.15s" }}>
+            <div className="field-label" style={{ marginBottom: 10 }}>{t.extras}</div>
+            <div className="toggle-row" style={{ marginBottom: 14 }}>
+              <Toggle
+                label={t.loonheffingskorting}
+                on={applyLoonheffingskorting}
+                onClick={() => setApplyLoonheffingskorting(!applyLoonheffingskorting)}
+                info={t.loonheffingskortingInfo}
+              />
+            </div>
             <div className="field-label" style={{ marginBottom: 10 }}>{t.hourlyLabel}</div>
             <div className="num-inputs-row">
               <NumInput label={t.hourlyRate} value={uurtarief} onChange={setUurtarief} suffix="€/hr" min={0} hint={t.hourlyRateHint} />
@@ -613,25 +681,26 @@ export default function App() {
         {result && (
           <div className="card" style={{ animationDelay: "0.2s" }}>
 
-            {/* Reverse mode: show found bruto prominently */}
-            {direction === "netto" && mode === "employee" && (
-              <div className="reverse-banner" style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, fontWeight: 600, color: "#0369a1", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{t.reversedBruto}</div>
-                <div className="reverse-bruto">{fmt(result.brutoJaar)}{inputMode === "maand" && <span style={{ fontSize: 16, fontWeight: 400, color: "#7ab8d9" }}> / {lang === "nl" ? "jaar" : "year"}</span>}</div>
-                <div style={{ fontSize: 12, color: "#0369a1", marginTop: 4, opacity: 0.7 }}>{fmt(result.brutoJaar / 12)} / {lang === "nl" ? "maand" : "month"}</div>
-                <div style={{ fontSize: 11, color: "#7ab8d9", marginTop: 4 }}>{t.reversedNote}</div>
+            {/* Result header -- shows the KEY output only */}
+            <div style={{ background: "#f0f9ff", border: "1px solid #bae6fd", borderRadius: 12, padding: "20px", marginBottom: 20 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#0369a1", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 8 }}>
+                {direction === "netto" && mode === "employee"
+                  ? (lang === "nl" ? "Benodigde brutosalaris" : "Required gross salary")
+                  : t.netPerMonth}
               </div>
-            )}
-
-            <div className="result-header">
-              <div>
-                <div className="netto-label">{t.netPerMonth}</div>
-                <div className="netto-amount">{fmt(result.nettoMaand)}</div>
-                <div className="netto-sub">{fmt(result.nettoJaar)} {t.perYearLabel}</div>
+              <div style={{ fontFamily: "'Syne', sans-serif", fontSize: "clamp(32px, 6vw, 44px)", fontWeight: 800, color: "#0369a1", lineHeight: 1, letterSpacing: "-0.02em" }}>
+                {direction === "netto" && mode === "employee"
+                  ? fmt(result.brutoJaar / 12)
+                  : fmt(result.nettoMaand)}
               </div>
-              <div className="effective-rate">
-                <div className="rate-number">{result.effectiveRate}%</div>
-                <div className="rate-label">{t.effectiveRate}</div>
+              <div style={{ fontSize: 14, color: "#7ab8d9", marginTop: 8, fontWeight: 400 }}>
+                {direction === "netto" && mode === "employee"
+                  ? `${fmt(result.brutoJaar)} / ${lang === "nl" ? "jaar" : "year"}`
+                  : `${fmt(result.nettoJaar)} / ${lang === "nl" ? "jaar" : "year"}`}
+              </div>
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #bae6fd", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 12, color: "#7ab8d9" }}>{t.effectiveRate}</span>
+                <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, color: "#0369a1" }}>{result.effectiveRate}%</span>
               </div>
             </div>
 
@@ -646,7 +715,7 @@ export default function App() {
             <div className="insight-row">
               <div className="insight-chip">
                 <div className="ic-label">{t.perDay}</div>
-                <div className="ic-value">{fmt(result.nettoPerDag || result.nettoJaar / workingDaysScaled)}</div>
+                <div className="ic-value">{fmt(result.nettoPerDag)}</div>
                 <div className="ic-sub">{t.perDayHint(workingDaysScaled)}</div>
               </div>
               <div className="insight-chip green">
@@ -657,7 +726,7 @@ export default function App() {
               {mode === "employee" && (
                 <div className="insight-chip dark">
                   <div className="ic-label">{t.fteInsight}</div>
-                  <div className="ic-value">{(fte).toFixed(2)}</div>
+                  <div className="ic-value">{fte.toFixed(2)}</div>
                   <div className="ic-sub">{t.fteInsightHint(fte, hoursPerWeek)}</div>
                 </div>
               )}
@@ -672,31 +741,45 @@ export default function App() {
 
             <div className="divider" />
 
+            {/* Breakdown grid -- NO vakantiegeld/13e maand here, shown separately below */}
             <div className="breakdown-grid">
               <div className="breakdown-item"><div className="bi-label">{mode === "zzp" ? t.grossProfit : t.grossSalaryLabel}</div><div className="bi-value">{fmt(mode === "zzp" ? result.winst : result.brutoJaar)}</div></div>
-              {mode === "employee" && result.vakantiegeld > 0 && <div className="breakdown-item"><div className="bi-label">{t.holidayPayLabel}</div><div className="bi-value">{fmt(result.vakantiegeld)}</div></div>}
-              {mode === "employee" && result.dertiendeMaand > 0 && <div className="breakdown-item"><div className="bi-label">{t.thirteenthLabel}</div><div className="bi-value">{fmt(result.dertiendeMaand)}</div></div>}
               {mode === "zzp" && <>
                 <div className="breakdown-item"><div className="bi-label">{t.selfEmployedDeduction}</div><div className="bi-value green">-{fmt(result.zelfstandigenaftrek)}</div></div>
                 <div className="breakdown-item"><div className="bi-label">{t.mkbLabel}</div><div className="bi-value green">-{fmt(result.mkbVrijstelling)}</div></div>
                 <div className="breakdown-item"><div className="bi-label">{t.taxableIncome}</div><div className="bi-value">{fmt(result.taxable)}</div></div>
               </>}
+              {mode === "employee" && result.vakantiegeld > 0 && <div className="breakdown-item"><div className="bi-label">{t.holidayOnce}</div><div className="bi-value">{fmt(result.vakantiegeld)}</div></div>}
+              {mode === "employee" && result.dertiendeMaand > 0 && <div className="breakdown-item"><div className="bi-label">{t.thirteenthLabel}</div><div className="bi-value">{fmt(result.dertiendeMaand)}</div></div>}
               {result.pensioenbedrag > 0 && <div className="breakdown-item"><div className="bi-label">{t.pensionDeduction}</div><div className="bi-value red">-{fmt(result.pensioenbedrag)}</div></div>}
               {result.bijtelling > 0 && <div className="breakdown-item"><div className="bi-label">{t.leaseBijtelling}</div><div className="bi-value red">+{fmt(result.bijtelling)}</div></div>}
               <div className="breakdown-item"><div className="bi-label">{t.grossTax}</div><div className="bi-value red">-{fmt(result.bracketTax)}</div></div>
-              <div className="breakdown-item"><div className="bi-label">{t.generalCredit}</div><div className="bi-value green">+{fmt(result.ahk)}</div></div>
-              <div className="breakdown-item"><div className="bi-label">{t.employmentCredit}</div><div className="bi-value green">+{fmt(result.arbeidskorting)}</div></div>
-              <div className="breakdown-item"><div className="bi-label">{t.netTax}</div><div className="bi-value red">-{fmt(result.inkomstenbelasting)}</div></div>
+              {result.ahk > 0 && <div className="breakdown-item"><div className="bi-label">{t.generalCredit}</div><div className="bi-value green">+{fmt(result.ahk)}</div></div>}
+              {result.arbeidskorting > 0 && <div className="breakdown-item"><div className="bi-label">{t.employmentCredit}</div><div className="bi-value green">+{fmt(result.arbeidskorting)}</div></div>}
+              {!applyLoonheffingskorting && (
+                <div className="breakdown-item" style={{ gridColumn: "1 / -1", background: "#fff7ed", border: "1px solid #fed7aa" }}>
+                  <div className="bi-label" style={{ color: "#c2410c" }}>{t.loonheffingskortingLabel}</div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: "#c2410c" }}>{lang === "nl" ? "Niet toegepast" : "Not applied"}</div>
+                </div>
+              )}
               <div className="breakdown-item"><div className="bi-label">{t.zvwLabel}</div><div className="bi-value red">-{fmt(result.zvw)}</div></div>
               {result.reiskostenJaar > 0 && <div className="breakdown-item"><div className="bi-label">{t.travelAllowance}</div><div className="bi-value green">+{fmt(result.reiskostenJaar)}</div></div>}
             </div>
 
-            {mode === "employee" && (result.vakantiegeld > 0 || result.dertiendeMaand > 0) && (
-              <div className="extras-row">
-                {result.vakantiegeld > 0 && <div className="extra-chip"><div className="ec-label">{t.holidayOnce}</div><div className="ec-value">{fmt(result.vakantiegeld)}</div></div>}
-                {result.dertiendeMaand > 0 && <div className="extra-chip"><div className="ec-label">{t.thirteenthOnce}</div><div className="ec-value">{fmt(result.dertiendeMaand)}</div></div>}
+            {/* Te betalen IB -- always full width below the grid so why €0 never shifts layout */}
+            <div style={{ marginTop: 8, background: "#f9f8f6", borderRadius: 10, padding: "11px 13px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div className="bi-label" style={{ marginBottom: 0 }}>{t.netTax}</div>
+                <div className="bi-value red">-{fmt(result.inkomstenbelasting)}</div>
               </div>
-            )}
+              {result.inkomstenbelasting === 0 && (
+                <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #ebebeb", fontSize: 12, color: "#15803d", lineHeight: 1.5 }}>
+                  ℹ️ {lang === "nl"
+                    ? "De heffingskortingen (AHK + arbeidskorting) zijn hoger dan de verschuldigde belasting. Dit is correct voor lagere inkomens."
+                    : "The tax credits (AHK + employment credit) exceed the tax owed. This is correct for lower incomes under Dutch tax law."}
+                </div>
+              )}
+            </div>
 
             {mode === "zzp" && <div className="zzp-note">{t.zzpNote}</div>}
 
@@ -746,9 +829,7 @@ export default function App() {
 
             <div className="disclaimer">{t.disclaimer.replace("{year}", year)}</div>
 
-            <div className="ad-placeholder" style={{ marginTop: 14 }}>
-              {t.adLabel}
-            </div>
+            <div className="ad-placeholder" style={{ marginTop: 14 }}>{t.adLabel}</div>
           </div>
         )}
 
