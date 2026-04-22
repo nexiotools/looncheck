@@ -475,6 +475,7 @@ export default function App() {
         .divider { border: none; border-top: 1px solid #f0ede8; margin: 16px 0; }
         .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
         .breakdown-item { background: #f9f8f6; border-radius: 10px; padding: 11px 13px; }
+        .breakdown-item.full { grid-column: 1 / -1; background: #f9f8f6; border-radius: 10px; padding: 11px 16px; display: flex; justify-content: space-between; align-items: center; }
         .bi-label { font-size: 11px; color: #aaa; font-weight: 500; margin-bottom: 3px; }
         .bi-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #1a1a1a; }
         .bi-value.red { color: #ef4444; }
@@ -768,8 +769,8 @@ export default function App() {
               {result.ahk > 0 && <div className="breakdown-item"><div className="bi-label">{t.generalCredit}</div><div className="bi-value green">+{fmt(result.ahk)}</div></div>}
               {result.arbeidskorting > 0 && <div className="breakdown-item"><div className="bi-label">{t.employmentCredit}</div><div className="bi-value green">+{fmt(result.arbeidskorting)}</div></div>}
               {!applyLoonheffingskorting && (
-                <div className="breakdown-item" style={{ gridColumn: "1 / -1", background: "#fff7ed", border: "1px solid #fed7aa" }}>
-                  <div className="bi-label" style={{ color: "#c2410c" }}>{t.loonheffingskortingLabel}</div>
+                <div className="breakdown-item full" style={{ background: "#fff7ed", border: "1px solid #fed7aa" }}>
+                  <div className="bi-label" style={{ color: "#c2410c", marginBottom: 0 }}>{t.loonheffingskortingLabel}</div>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: "#c2410c" }}>{lang === "nl" ? "Niet toegepast" : "Not applied"}</div>
                 </div>
               )}
@@ -777,20 +778,21 @@ export default function App() {
               {result.reiskostenJaar > 0 && <div className="breakdown-item"><div className="bi-label">{t.travelAllowance}</div><div className="bi-value green">+{fmt(result.reiskostenJaar)}</div></div>}
             </div>
 
-            {/* Te betalen IB -- always full width below the grid so why €0 never shifts layout */}
-            <div style={{ marginTop: 8, background: "#f9f8f6", borderRadius: 10, padding: "11px 13px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div className="bi-label" style={{ marginBottom: 0 }}>{t.netTax}</div>
+            {/* Te betalen IB -- outside grid, value aligned to right column */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
+              <div style={{ background: "#f9f8f6", borderRadius: 10, padding: "11px 13px" }}>
+                <div className="bi-label">{t.netTax}</div>
                 <div className="bi-value red">-{fmt(result.inkomstenbelasting)}</div>
               </div>
-              {result.inkomstenbelasting === 0 && (
-                <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #ebebeb", fontSize: 12, color: "#15803d", lineHeight: 1.5 }}>
-                  ℹ️ {lang === "nl"
-                    ? "De heffingskortingen (AHK + arbeidskorting) zijn hoger dan de verschuldigde belasting. Dit is correct voor lagere inkomens."
-                    : "The tax credits (AHK + employment credit) exceed the tax owed. This is correct for lower incomes under Dutch tax law."}
-                </div>
-              )}
+              <div /> {/* empty right cell to keep alignment */}
             </div>
+            {result.inkomstenbelasting === 0 && (
+              <div style={{ marginTop: 6, padding: "8px 12px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, fontSize: 12, color: "#15803d", lineHeight: 1.5 }}>
+                ℹ️ {lang === "nl"
+                  ? "De heffingskortingen zijn hoger dan de verschuldigde belasting. Dit is correct voor lagere inkomens."
+                  : "Tax credits exceed the tax owed. This is correct for lower incomes under Dutch tax law."}
+              </div>
+            )}
 
             {mode === "zzp" && <div className="zzp-note">{t.zzpNote}</div>}
 
