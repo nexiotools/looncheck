@@ -690,6 +690,25 @@ export default function App() {
                   ? `${fmt(result.brutoJaar)} / ${lang === "nl" ? "jaar" : "year"}`
                   : `${fmt(result.nettoJaar)} / ${lang === "nl" ? "jaar" : "year"}`}
               </div>
+              {/* FT equivalent -- only shown in netto->bruto when FTE < 1 */}
+              {direction === "netto" && mode === "employee" && fte < 1 && (
+                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #bae6fd" }}>
+                  <div style={{ fontSize: 11, color: "#7ab8d9", marginBottom: 3 }}>
+                    {lang === "nl" ? `Fulltime equivalent (40u/week)` : `Full-time equivalent (40hrs/week)`}
+                  </div>
+                  <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 18, fontWeight: 700, color: "#0369a1" }}>
+                    {fmt((result.brutoJaar / 12) / fte)} / {lang === "nl" ? "maand" : "month"}
+                    <span style={{ fontSize: 13, fontWeight: 400, color: "#7ab8d9", marginLeft: 8 }}>
+                      · {fmt(result.brutoJaar / fte)} / {lang === "nl" ? "jaar" : "year"}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "#7ab8d9", marginTop: 3 }}>
+                    {lang === "nl"
+                      ? `Functiesalaris bij ${(fte * 100).toFixed(0)}% FTE (${hoursPerWeek}u/week)`
+                      : `Job salary at ${(fte * 100).toFixed(0)}% FTE (${hoursPerWeek}hrs/week)`}
+                  </div>
+                </div>
+              )}
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #bae6fd", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: 12, color: "#7ab8d9" }}>{t.effectiveRate}</span>
                 <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 16, fontWeight: 800, color: "#0369a1" }}>{result.effectiveRate}%</span>
