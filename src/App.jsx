@@ -839,7 +839,7 @@ export default function App() {
         )}
 
         <div className="footer">
-          <p>{t.footerBy} <a href="https://nexio.tools" target="_blank" rel="noopener noreferrer">Nexio</a> &mdash; {t.footerRates} {year}</p>
+          <p>{t.footerBy} <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">nexiotools.nl</a> &mdash; {t.footerRates} {year}</p>
         </div>
       </div>
     </div>
