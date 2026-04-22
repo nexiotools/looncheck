@@ -774,21 +774,13 @@ export default function App() {
                   <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 13, fontWeight: 700, color: "#c2410c" }}>{lang === "nl" ? "Niet toegepast" : "Not applied"}</div>
                 </div>
               )}
+              <div className="breakdown-item"><div className="bi-label">{t.netTax}{result.inkomstenbelasting === 0 && <span style={{ marginLeft: 4, color: "#15803d", fontSize: 11, fontWeight: 700 }}>*</span>}</div><div className="bi-value red">-{fmt(result.inkomstenbelasting)}</div></div>
               <div className="breakdown-item"><div className="bi-label">{t.zvwLabel}</div><div className="bi-value red">-{fmt(result.zvw)}</div></div>
               {result.reiskostenJaar > 0 && <div className="breakdown-item"><div className="bi-label">{t.travelAllowance}</div><div className="bi-value green">+{fmt(result.reiskostenJaar)}</div></div>}
             </div>
-
-            {/* Te betalen IB -- outside grid, value aligned to right column */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}>
-              <div style={{ background: "#f9f8f6", borderRadius: 10, padding: "11px 13px" }}>
-                <div className="bi-label">{t.netTax}</div>
-                <div className="bi-value red">-{fmt(result.inkomstenbelasting)}</div>
-              </div>
-              <div /> {/* empty right cell to keep alignment */}
-            </div>
             {result.inkomstenbelasting === 0 && (
               <div style={{ marginTop: 6, padding: "8px 12px", background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, fontSize: 12, color: "#15803d", lineHeight: 1.5 }}>
-                ℹ️ {lang === "nl"
+                * {lang === "nl"
                   ? "De heffingskortingen zijn hoger dan de verschuldigde belasting. Dit is correct voor lagere inkomens."
                   : "Tax credits exceed the tax owed. This is correct for lower incomes under Dutch tax law."}
               </div>
