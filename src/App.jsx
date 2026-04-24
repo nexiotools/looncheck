@@ -840,6 +840,12 @@ export default function App() {
 
         <div className="footer">
           <p>{t.footerBy} <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">nexiotools.nl</a> &mdash; {t.footerRates} {year}</p>
+          <p style={{ fontSize: 11, color: "#bbb", marginTop: 6 }}>
+            {lang === "nl" ? "Je gegevens worden veilig verwerkt en nooit opgeslagen." : "Your data is processed securely and never stored."} &nbsp;
+            <a href="https://nexiotools.nl/privacy.html" target="_blank" rel="noopener noreferrer" style={{ color: "#bbb" }}>Privacy Policy</a>
+            &nbsp;·&nbsp;
+            <a href="https://nexiotools.nl/terms.html" target="_blank" rel="noopener noreferrer" style={{ color: "#bbb" }}>Terms of Service</a>
+          </p>
         </div>
       </div>
     </div>
