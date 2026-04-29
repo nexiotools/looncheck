@@ -515,7 +515,15 @@ export default function App() {
         {/* Header */}
         <div className="header">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-            <div className="logo"><span className="logo-dot" />LoonHelder</div>
+            <div className="logo">
+              <svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="32" height="32" rx="7" fill="#0e1631"/>
+                <rect x="6" y="6" width="5" height="20" rx="1.4" fill="white"/>
+                <rect x="21" y="6" width="5" height="20" rx="1.4" fill="white"/>
+                <polygon points="11,6 16,6 26,26 21,26" fill="#4f8eff"/>
+              </svg>
+              LoonHelder
+            </div>
             <div className="seg" style={{ width: "auto", padding: 2, gap: 2 }}>
               <button className={`seg-btn${lang === "nl" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setLang("nl")}>🇳🇱 NL</button>
               <button className={`seg-btn${lang === "en" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setLang("en")}>🇬🇧 EN</button>
