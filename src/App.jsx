@@ -520,7 +520,7 @@ export default function App() {
                 <rect width="32" height="32" rx="7" fill="#0e1631"/>
                 <rect x="6" y="6" width="5" height="20" rx="1.4" fill="white"/>
                 <rect x="21" y="6" width="5" height="20" rx="1.4" fill="white"/>
-                <polygon points="11,6 16,6 26,26 21,26" fill="#4f8eff"/>
+                <polygon points="11,6 16,6 26,26 21,26" fill="#ff4f4f"/>
               </svg>
               LoonHelder
             </div>
