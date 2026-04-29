@@ -52,7 +52,7 @@ const T = {
     holidayPay: "Vakantiegeld (8%)", thirteenth: "13e maand", ruling30: "30% ruling",
     loonheffingskorting: "Loonheffingskorting",
     loonheffingskortingInfo: "De loonheffingskorting verlaagt je belasting. Je mag dit slechts bij één werkgever tegelijk toepassen. Bij een tweede baan of uitkering zet je dit uit.",
-    ruling30Info: "30% van het brutoloon is belastingvrij als kostenvergoeding. Alleen voor expats met een geldige beschikking.",
+    ruling30Info: "30% ruling: belastingvrij percentage van het brutoloon voor expats. Fase 1 (maand 1-20): 30%, Fase 2 (maand 21-40): 20%, Fase 3 (maand 41-60): 10%. Min. brutosalaris €68.590 (of €52.139 voor <30 jaar met master). Max. €262.000.",
     advancedToggle: "Pensioen, reiskosten & lease auto",
     pensionLabel: "Pensioenpremie werknemer", pensionSuffix: "% van bruto", pensionHint: "Gemiddeld 4-8% in NL",
     travelLabel: "Reiskostenvergoeding", kmLabel: "Km enkele reis", kmHint: "Thuis → werk",
@@ -108,7 +108,7 @@ const T = {
     holidayPay: "Holiday pay (8%)", thirteenth: "13th month bonus", ruling30: "30% ruling",
     loonheffingskorting: "Tax credit (loonheffingskorting)",
     loonheffingskortingInfo: "The tax credit reduces your income tax. You may only apply this at one employer at a time. Turn it off for a second job or benefit.",
-    ruling30Info: "30% of gross salary is tax-free as expense allowance. Only for expats with a valid ruling.",
+    ruling30Info: "30% ruling: tax-free allowance for expats. Phase 1 (months 1-20): 30%, Phase 2 (months 21-40): 20%, Phase 3 (months 41-60): 10%. Min. gross salary €68,590 (or €52,139 for under-30 with Master's). Max. €262,000.",
     advancedToggle: "Pension, travel & company car",
     pensionLabel: "Employee pension contribution", pensionSuffix: "% of gross", pensionHint: "Average 4-8% in NL",
     travelLabel: "Travel allowance", kmLabel: "One-way distance", kmHint: "Home → work",
@@ -191,22 +191,44 @@ function calcTax(taxable, cfg, applyLoonheffingskorting = true) {
   };
 }
 
-function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek = 40, applyLoonheffingskorting = true }) {
+function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, ruling30Phase = 1, hoursPerWeek = 40, applyLoonheffingskorting = true }) {
   const cfg = TAX_CONFIG[parseInt(year)];
   const fte = hoursPerWeek / 40;
 
-  // brutoJaar is the ACTUAL salary for this FTE (already scaled)
-  // e.g. if full-time is €60k and FTE=0.5, brutoJaar should be €30k
-  const brutoTaxable = brutoJaar * (ruling30 ? 0.70 : 1.0);
+  // Holiday pay and 13th month are part of the total wage package
   const vakantiegeld = includeVakantie ? brutoJaar * 0.08 : 0;
   const dertiendeMaand = include13th ? brutoJaar / 12 : 0;
+  const totalBruto = brutoJaar + vakantiegeld + dertiendeMaand;
   const pensioenbedrag = Math.round(brutoJaar * (pensioenpremie / 100));
   const bijtelling = leaseWaarde > 0 ? Math.round(leaseWaarde * (leaseType === "elektrisch" ? cfg.lease_bijtelling_elektrisch : cfg.lease_bijtelling_overig)) : 0;
 
-  const totalBruto = brutoTaxable + vakantiegeld + dertiendeMaand;
-  const taxableIncome = Math.max(0, totalBruto - pensioenbedrag + bijtelling);
+  // 30% ruling: tapered since 2024
+  // Phase 1 (months 1-20): 30% tax-free, Phase 2 (months 21-40): 20%, Phase 3 (months 41-60): 10%
+  // Applies to total wage package incl. vakantiegeld and 13th month
+  // WNT cap: max €262,000 gross (2026)
+  // Minimum salary (taxable): €48,013 regular, €36,497 under-30 Master's
+  const WNT_CAP = 262000;
+  const RULING_MIN_TAXABLE = 48013; // 2026 regular minimum taxable salary
+  const rulingRates = [0.30, 0.20, 0.10];
+  const rulingRate = ruling30 ? rulingRates[Math.min(ruling30Phase - 1, 2)] : 0;
 
+  let taxFreeAmount = 0;
+  let brutoTaxable = totalBruto;
+
+  if (ruling30 && rulingRate > 0) {
+    const cappedBruto = Math.min(totalBruto, WNT_CAP);
+    const potentialTaxable = cappedBruto * (1 - rulingRate);
+    // Taxable must be at least MIN_TAXABLE — apply floor
+    const actualTaxable = Math.max(potentialTaxable, RULING_MIN_TAXABLE);
+    taxFreeAmount = Math.max(0, cappedBruto - actualTaxable);
+    // Income above WNT cap is fully taxable
+    brutoTaxable = actualTaxable + Math.max(0, totalBruto - WNT_CAP);
+  }
+
+  const taxableIncome = Math.max(0, brutoTaxable - pensioenbedrag + bijtelling);
   const tax = calcTax(taxableIncome, cfg, applyLoonheffingskorting);
+
+  // ZVW is always on full totalBruto (not reduced by ruling)
   const zvw = Math.round(Math.min(totalBruto, cfg.zvwMax) * cfg.zvwEmployee);
 
   const maxDays = Math.round(cfg.reiskosten_max_days * fte);
@@ -225,6 +247,8 @@ function calcEmployee({ brutoJaar, year, includeVakantie, include13th, pensioenp
     pensioenbedrag,
     bijtelling,
     reiskostenJaar,
+    taxFreeAmount: Math.round(taxFreeAmount),
+    rulingRate,
     ...tax,
     zvw,
     nettoJaar: Math.round(nettoJaar),
@@ -277,13 +301,20 @@ function fmt(n) { return "€" + Math.round(n).toLocaleString("nl-NL"); }
 function Bar({ label, value, total, color, sublabel }) {
   const pct = total > 0 ? Math.min(100, (value / total) * 100) : 0;
   return (
-    <div style={{ marginBottom: 10 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-        <div><span style={{ fontSize: 12, color: "#666" }}>{label}</span>{sublabel && <span style={{ fontSize: 10, color: "#bbb", marginLeft: 6 }}>{sublabel}</span>}</div>
-        <span style={{ fontSize: 12, color: "#1a1a1a", fontWeight: 600 }}>{fmt(value)}</span>
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ width: 10, height: 10, borderRadius: 2, background: color, flexShrink: 0 }} />
+          <span style={{ fontSize: 13, color: "#444", fontWeight: 400 }}>{label}</span>
+          {sublabel && <span style={{ fontSize: 10, color: "#bbb" }}>{sublabel}</span>}
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <span style={{ fontSize: 11, color: "#aaa", fontWeight: 500 }}>{Math.round(pct)}%</span>
+          <span style={{ fontSize: 13, color: "#1a1a1a", fontWeight: 700 }}>{fmt(value)}</span>
+        </div>
       </div>
-      <div style={{ height: 6, background: "#f0ede8", borderRadius: 3, overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 3, transition: "width 0.6s ease" }} />
+      <div style={{ height: 10, background: "#f0ede8", borderRadius: 5, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 5, transition: "width 0.6s ease" }} />
       </div>
     </div>
   );
@@ -298,15 +329,16 @@ function Toggle({ label, on, onClick, info }) {
         {label}
         {info && (
           <span
-            onClick={e => { e.stopPropagation(); setShowInfo(!showInfo); }}
+            onMouseEnter={() => setShowInfo(true)}
+            onMouseLeave={() => setShowInfo(false)}
+            onClick={e => e.stopPropagation()}
             style={{ marginLeft: 4, width: 14, height: 14, borderRadius: "50%", background: on ? "rgba(255,255,255,0.3)" : "#e8e4de", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 700, cursor: "help", color: on ? "#fff" : "#888", flexShrink: 0 }}
           >i</span>
         )}
       </label>
       {showInfo && info && (
-        <div style={{ position: "absolute", top: "100%", left: 0, zIndex: 10, background: "#fff", border: "1px solid #e8e4de", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#444", lineHeight: 1.6, maxWidth: 260, marginTop: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.1)" }}>
+        <div style={{ position: "absolute", bottom: "100%", left: 0, zIndex: 100, background: "#fff", border: "1px solid #e8e4de", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#444", lineHeight: 1.6, width: 280, marginBottom: 4, boxShadow: "0 4px 16px rgba(0,0,0,0.15)" }}>
           {info}
-          <button onClick={() => setShowInfo(false)} style={{ display: "block", marginTop: 6, background: "transparent", border: "none", color: "#aaa", fontSize: 11, cursor: "pointer", padding: 0 }}>✕ Sluiten</button>
         </div>
       )}
     </div>
@@ -374,6 +406,7 @@ export default function App() {
   const [leaseWaarde, setLeaseWaarde] = useState(0);
   const [leaseType, setLeaseType] = useState("overig");
   const [ruling30, setRuling30] = useState(false);
+  const [ruling30Phase, setRuling30Phase] = useState(1);
   const [applyLoonheffingskorting, setApplyLoonheffingskorting] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -390,7 +423,7 @@ export default function App() {
   const cfg = TAX_CONFIG[parseInt(year)];
   const otherYear = year === "2026" ? "2025" : "2026";
 
-  const employeeParams = { year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, hoursPerWeek, applyLoonheffingskorting };
+  const employeeParams = { year, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, ruling30Phase, hoursPerWeek, applyLoonheffingskorting };
 
   const getJaarBruto = () => {
     const val = parseFloat(bruto.replace(/\./g, "").replace(",", ".")) || 0;
@@ -418,7 +451,7 @@ export default function App() {
       if (nettoTarget <= 0) { setResult(null); return; }
       setResult(calcBrutoFromNetto({ nettoJaarTarget: nettoTarget, ...employeeParams }));
     }
-  }, [mode, direction, year, bruto, nettoInput, inputMode, hoursPerWeek, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, applyLoonheffingskorting, uurtarief, uurPerWeek]);
+  }, [mode, direction, year, bruto, nettoInput, inputMode, hoursPerWeek, includeVakantie, include13th, pensioenpremie, reiskostenKm, reiskostenDagen, leaseWaarde, leaseType, ruling30, ruling30Phase, applyLoonheffingskorting, uurtarief, uurPerWeek]);
 
   useEffect(() => {
     if (!showCompare || !result) return;
@@ -613,10 +646,32 @@ export default function App() {
           <div className="card" style={{ animationDelay: "0.15s" }}>
             <div className="field-label" style={{ marginBottom: 10 }}>{t.extras}</div>
             <div className="toggle-row">
+              <Toggle label={t.loonheffingskorting} on={applyLoonheffingskorting} onClick={() => setApplyLoonheffingskorting(!applyLoonheffingskorting)} info={t.loonheffingskortingInfo} />
               <Toggle label={t.holidayPay} on={includeVakantie} onClick={() => setIncludeVakantie(!includeVakantie)} />
               <Toggle label={t.thirteenth} on={include13th} onClick={() => setInclude13th(!include13th)} />
-              <Toggle label={t.ruling30} on={ruling30} onClick={() => setRuling30(!ruling30)} info={t.ruling30Info} />
-              <Toggle label={t.loonheffingskorting} on={applyLoonheffingskorting} onClick={() => setApplyLoonheffingskorting(!applyLoonheffingskorting)} info={t.loonheffingskortingInfo} />
+              <div>
+                <Toggle label={t.ruling30} on={ruling30} onClick={() => setRuling30(!ruling30)} info={t.ruling30Info} />
+                {ruling30 && (
+                  <div style={{ display: "flex", gap: 6, marginTop: 8, marginLeft: 2 }}>
+                    {[
+                      { phase: 1, label: lang === "nl" ? "Fase 1 · 30%" : "Phase 1 · 30%", months: lang === "nl" ? "mnd 1–20" : "mo 1–20" },
+                      { phase: 2, label: lang === "nl" ? "Fase 2 · 20%" : "Phase 2 · 20%", months: lang === "nl" ? "mnd 21–40" : "mo 21–40" },
+                      { phase: 3, label: lang === "nl" ? "Fase 3 · 10%" : "Phase 3 · 10%", months: lang === "nl" ? "mnd 41–60" : "mo 41–60" },
+                    ].map(({ phase, label, months }) => (
+                      <button key={phase} onClick={() => setRuling30Phase(phase)} style={{
+                        flex: 1, padding: "6px 4px", fontFamily: "DM Sans, sans-serif",
+                        background: ruling30Phase === phase ? "#0f0f0f" : "#f5f3f0",
+                        color: ruling30Phase === phase ? "#fff" : "#666",
+                        border: `1px solid ${ruling30Phase === phase ? "#0f0f0f" : "#e8e4de"}`,
+                        borderRadius: 8, cursor: "pointer", textAlign: "center", lineHeight: 1.4
+                      }}>
+                        <div style={{ fontSize: 12, fontWeight: 700 }}>{label}</div>
+                        <div style={{ fontSize: 10, opacity: 0.6 }}>{months}</div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             <button className="expand-btn" onClick={() => setShowAdvanced(!showAdvanced)}>
@@ -716,6 +771,14 @@ export default function App() {
                       ? `Functiesalaris bij ${(fte * 100).toFixed(0)}% FTE (${hoursPerWeek}u/week)`
                       : `Job salary at ${(fte * 100).toFixed(0)}% FTE (${hoursPerWeek}hrs/week)`}
                   </div>
+                </div>
+              )}
+              {result.taxFreeAmount > 0 && (
+                <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #bae6fd", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 12, color: "#7ab8d9" }}>
+                    {lang === "nl" ? `30% ruling (${Math.round(result.rulingRate * 100)}% belastingvrij)` : `30% ruling (${Math.round(result.rulingRate * 100)}% tax-free)`}
+                  </span>
+                  <span style={{ fontFamily: "'Syne', sans-serif", fontSize: 14, fontWeight: 700, color: "#0369a1" }}>{fmt(result.taxFreeAmount)}</span>
                 </div>
               )}
               <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #bae6fd", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
