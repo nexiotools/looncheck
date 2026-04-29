@@ -84,13 +84,13 @@ const T = {
     compareRows: ["Netto/maand", "Netto/jaar", "Belasting", "ZVW bijdrage", "Eff. tarief"],
     copyBtn: "📋 Kopieer berekening", copied: "✓ Gekopieerd",
     disclaimer: "Indicatieve berekening op basis van officiële tarieven {year} (Belastingdienst). Geen rekening gehouden met hypotheekrenteaftrek, toeslagen of andere persoonlijke situaties. Raadpleeg een belastingadviseur voor een exacte berekening.",
-    footerBy: "Looncheck door", footerRates: "Tarieven gebaseerd op Belastingdienst", adLabel: "Advertentie",
+    footerBy: "LoonHelder door", footerRates: "Tarieven gebaseerd op Belastingdienst", adLabel: "Advertentie",
     copyText: (year, mode, r, fmt) => [
-      `Looncheck berekening ${year}`,
+      `LoonHelder berekening ${year}`,
       `Modus: ${mode === "employee" ? "Werknemer" : "ZZP"}`,
       `Bruto: ${fmt(mode === "zzp" ? r.winst : r.brutoJaar)}`,
       `Netto/maand: ${fmt(r.nettoMaand)}`, `Netto/jaar: ${fmt(r.nettoJaar)}`,
-      `Effectief tarief: ${r.effectiveRate}%`, `Berekend via looncheck.nexio.tools`,
+      `Effectief tarief: ${r.effectiveRate}%`, `Berekend via loonhelder.nl`,
     ].join("\n"),
   },
   en: {
@@ -140,13 +140,13 @@ const T = {
     compareRows: ["Net/month", "Net/year", "Tax", "Health ins.", "Eff. rate"],
     copyBtn: "📋 Copy calculation", copied: "✓ Copied",
     disclaimer: "Indicative calculation based on official {year} rates (Dutch Tax Authority). Does not account for mortgage deductions, allowances or other personal circumstances. Consult a tax advisor for an exact calculation.",
-    footerBy: "Looncheck by", footerRates: "Rates based on Belastingdienst", adLabel: "Advertisement",
+    footerBy: "LoonHelder by", footerRates: "Rates based on Belastingdienst", adLabel: "Advertisement",
     copyText: (year, mode, r, fmt) => [
-      `Looncheck calculation ${year}`,
+      `LoonHelder calculation ${year}`,
       `Mode: ${mode === "employee" ? "Employee" : "Freelancer"}`,
       `Gross: ${fmt(mode === "zzp" ? r.winst : r.brutoJaar)}`,
       `Net/month: ${fmt(r.nettoMaand)}`, `Net/year: ${fmt(r.nettoJaar)}`,
-      `Effective rate: ${r.effectiveRate}%`, `Calculated via looncheck.nexio.tools`,
+      `Effective rate: ${r.effectiveRate}%`, `Calculated via loonhelder.nl`,
     ].join("\n"),
   },
 };
@@ -515,7 +515,7 @@ export default function App() {
         {/* Header */}
         <div className="header">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
-            <div className="logo"><span className="logo-dot" />Looncheck</div>
+            <div className="logo"><span className="logo-dot" />LoonHelder</div>
             <div className="seg" style={{ width: "auto", padding: 2, gap: 2 }}>
               <button className={`seg-btn${lang === "nl" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setLang("nl")}>🇳🇱 NL</button>
               <button className={`seg-btn${lang === "en" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setLang("en")}>🇬🇧 EN</button>
