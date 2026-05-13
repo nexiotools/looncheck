@@ -387,7 +387,10 @@ function NumInput({ label, value, onChange, suffix, min = 0, max, step = 1, hint
 // MAIN APP
 // ════════════════════════════════════════════════════════════════════════════
 export default function App() {
-  const [lang, setLang] = useState("nl");
+  const [lang, setLang] = useState(() => {
+    try { const saved = localStorage.getItem("loonhelder_lang"); if (saved && ["nl","en"].includes(saved)) return saved; } catch(e) {}
+    return "nl";
+  });
   const t = T[lang];
 
   const [mode, setMode] = useState("employee");
@@ -558,8 +561,8 @@ export default function App() {
               LoonHelder
             </div>
             <div className="seg" style={{ width: "auto", padding: 2, gap: 2 }}>
-              <button className={`seg-btn${lang === "nl" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setLang("nl")}>🇳🇱 NL</button>
-              <button className={`seg-btn${lang === "en" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => setLang("en")}>🇬🇧 EN</button>
+              <button className={`seg-btn${lang === "nl" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => { setLang("nl"); try { localStorage.setItem("loonhelder_lang", "nl"); window.dispatchEvent(new CustomEvent("loonhelder_lang_change", { detail: "nl" })); } catch(e) {} }}>🇳🇱 NL</button>
+              <button className={`seg-btn${lang === "en" ? " active" : ""}`} style={{ padding: "5px 12px", fontSize: 12 }} onClick={() => { setLang("en"); try { localStorage.setItem("loonhelder_lang", "en"); window.dispatchEvent(new CustomEvent("loonhelder_lang_change", { detail: "en" })); } catch(e) {} }}>🇬🇧 EN</button>
             </div>
           </div>
           <h1>{t.title}<br /><span>{t.subtitle}</span></h1>
