@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="nl" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Over LoonHelder — Bruto Netto Calculator Nederland</title>
+  <meta name="description" content="LoonHelder is gebouwd door een ervaren IT-professional met jarenlange ervaring in Nederlandse financiële systemen. Betrouwbare salarisberekeningen op basis van officiële Belastingdienst-tarieven." />
+  <link rel="canonical" href="https://loonhelder.nl/about.html" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #f5f3f0; --surface: #fff; --border: rgba(0,0,0,0.08); --text: #1a1a1a; --muted: #555; --faint: #999; --accent: #0e1631; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 14px; }
+    .back:hover { color: var(--text); }
+    .lang-toggle { display: flex; background: #e8e4de; border-radius: 8px; overflow: hidden; }
+    .lang-btn { padding: 6px 14px; font-size: 13px; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--muted); font-family: system-ui, sans-serif; }
+    .lang-btn.active { background: var(--accent); color: #fff; border-radius: 6px; }
+    .kicker { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { font-size: clamp(26px, 5vw, 38px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 20px; }
+    h2 { font-size: 17px; font-weight: 700; margin: 32px 0 10px; }
+    p { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 10px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin: 24px 0; }
+    .card-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 14px; }
+    .card-row:last-child { margin-bottom: 0; }
+    .card-icon { font-size: 20px; width: 28px; flex-shrink: 0; }
+    .card-label { font-size: 12px; color: var(--faint); margin-bottom: 2px; }
+    .card-value { font-size: 15px; color: var(--text); font-weight: 500; }
+    .tag { display: inline-block; background: #e8e4de; color: var(--muted); font-size: 12px; padding: 4px 10px; border-radius: 6px; margin: 4px 4px 0 0; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+    footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    footer a { font-size: 13px; color: var(--faint); text-decoration: none; }
+    footer a:hover { color: var(--muted); }
+    .lang-block { display: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="/" class="back">← loonhelder.nl</a>
+      <div class="lang-toggle">
+        <button class="lang-btn" id="btn-nl" onclick="setLang('nl')">NL</button>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+
+    <!-- NL -->
+    <div class="lang-block" id="block-nl">
+      <p class="kicker">Over ons</p>
+      <h1>Over LoonHelder</h1>
+
+      <p>LoonHelder is gebouwd omdat bestaande bruto-netto calculators te vaak verouderde tarieven gebruikten, de 30% ruling verkeerd berekenden, of geen rekening hielden met ZZP-specifieke aftrekposten. Het doel was simpel: één betrouwbare calculator die de officiële Belastingdienst-tarieven correct toepast.</p>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-icon">🏗️</div>
+          <div>
+            <div class="card-label">Achtergrond</div>
+            <div class="card-value">CTO met meer dan 10 jaar ervaring in Nederlandse financiële systemen en digitale producten</div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-icon">📍</div>
+          <div>
+            <div class="card-label">Locatie</div>
+            <div class="card-value">Rotterdam, Nederland</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>Hoe worden de tarieven bepaald?</h2>
+      <p>Alle belastingtarieven, heffingskortingen en premies in LoonHelder zijn gebaseerd op officiële publicaties van de <a href="https://www.belastingdienst.nl" target="_blank" rel="noopener noreferrer">Belastingdienst</a> en de <a href="https://wetten.overheid.nl" target="_blank" rel="noopener noreferrer">Nederlandse wetgeving</a>. De tarieven worden jaarlijks gecontroleerd en bijgewerkt bij de invoering van de nieuwe Loonbelasting.</p>
+      <p>Voor 2026 zijn de volgende bronnen gebruikt: het Belastingplan 2026, de AGIRC-ARRCO-akkoorden voor de 30% ruling, en de officële PASS-waarden van het UWV. Bij twijfel wordt altijd de meest conservatieve interpretatie gehanteerd.</p>
+
+      <h2>Wat berekent LoonHelder precies?</h2>
+      <p>LoonHelder berekent het nettoloon voor werknemers in loondienst en ZZP'ers op basis van de Nederlandse belastingwetgeving 2025 en 2026. De calculator houdt rekening met:</p>
+      <div style="margin: 12px 0;">
+        <span class="tag">Loonheffing 2026</span>
+        <span class="tag">Algemene heffingskorting</span>
+        <span class="tag">Arbeidskorting</span>
+        <span class="tag">ZVW-bijdrage</span>
+        <span class="tag">30% ruling (gefaseerd)</span>
+        <span class="tag">Zelfstandigenaftrek</span>
+        <span class="tag">MKB-winstvrijstelling</span>
+        <span class="tag">Vakantiegeld</span>
+        <span class="tag">Reiskosten</span>
+        <span class="tag">Lease auto bijtelling</span>
+      </div>
+
+      <h2>Nauwkeurigheid en beperkingen</h2>
+      <p>LoonHelder geeft een nauwkeurige indicatie op basis van de officiële tarieven. De calculator houdt geen rekening met persoonlijke aftrekposten zoals hypotheekrente, studiekosten of specifieke zorgkosten. Voor een definitieve belastingberekening raden wij aan om een belastingadviseur of de Belastingdienst te raadplegen.</p>
+
+      <h2>Contact</h2>
+      <p>Vragen, opmerkingen of een fout gevonden? Stuur een e-mail naar <a href="mailto:nexio.tools@gmail.com">nexio.tools@gmail.com</a>.</p>
+      <p>LoonHelder maakt deel uit van <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">Nexio Tools</a>, een collectie van tools voor professionals.</p>
+    </div>
+
+    <!-- EN -->
+    <div class="lang-block" id="block-en">
+      <p class="kicker">About</p>
+      <h1>About LoonHelder</h1>
+
+      <p>LoonHelder was built because existing gross-to-net calculators too often used outdated rates, incorrectly calculated the 30% ruling, or failed to account for self-employed deductions. The goal was simple: one reliable calculator that correctly applies the official Dutch Tax Authority rates.</p>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-icon">🏗️</div>
+          <div>
+            <div class="card-label">Background</div>
+            <div class="card-value">CTO with 10+ years of experience in Dutch financial systems and digital products</div>
+          </div>
+        </div>
+        <div class="card-row">
+          <div class="card-icon">📍</div>
+          <div>
+            <div class="card-label">Location</div>
+            <div class="card-value">Rotterdam, the Netherlands</div>
+          </div>
+        </div>
+      </div>
+
+      <h2>How are the rates determined?</h2>
+      <p>All tax rates, credits and contributions in LoonHelder are based on official publications by the <a href="https://www.belastingdienst.nl" target="_blank" rel="noopener noreferrer">Dutch Tax Authority (Belastingdienst)</a> and Dutch legislation. Rates are reviewed and updated annually when the new payroll tax tables are published.</p>
+      <p>For 2026, the following sources were used: the Tax Plan 2026 (Belastingplan 2026), the AGIRC-ARRCO agreements for the 30% ruling, and the official PASS values from the UWV. When in doubt, the most conservative interpretation is always applied.</p>
+
+      <h2>What does LoonHelder calculate?</h2>
+      <p>LoonHelder calculates net salary for employees and self-employed professionals under Dutch tax law for 2025 and 2026. The calculator accounts for:</p>
+      <div style="margin: 12px 0;">
+        <span class="tag">Payroll tax 2026</span>
+        <span class="tag">General tax credit</span>
+        <span class="tag">Employment tax credit</span>
+        <span class="tag">ZVW health contribution</span>
+        <span class="tag">30% ruling (phased)</span>
+        <span class="tag">Self-employed deduction</span>
+        <span class="tag">SME profit exemption</span>
+        <span class="tag">Holiday pay</span>
+        <span class="tag">Commuting allowance</span>
+        <span class="tag">Company car benefit-in-kind</span>
+      </div>
+
+      <h2>Accuracy and limitations</h2>
+      <p>LoonHelder provides an accurate estimate based on official rates. The calculator does not account for personal deductions such as mortgage interest, study costs, or specific healthcare expenses. For a definitive tax calculation, we recommend consulting a tax advisor or the Belastingdienst directly.</p>
+
+      <h2>Contact</h2>
+      <p>Questions, feedback, or found an error? Email us at <a href="mailto:nexio.tools@gmail.com">nexio.tools@gmail.com</a>.</p>
+      <p>LoonHelder is part of <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">Nexio Tools</a>, a collection of tools for professionals.</p>
+    </div>
+
+    <hr />
+    <footer>
+      <a href="/">← loonhelder.nl</a>
+      <div style="display:flex;gap:20px;">
+        <a href="/about.html" id="footer-about">Over ons</a>
+        <a href="/privacy.html" id="footer-privacy">Privacybeleid</a>
+        <a href="/contact.html" id="footer-contact">Contact</a>
+        <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">Nexio Tools</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.getElementById('html-root').lang = lang;
+      document.getElementById('page-title').textContent = lang === 'nl'
+        ? 'Over LoonHelder — Bruto Netto Calculator Nederland'
+        : 'About LoonHelder — Dutch Gross Net Salary Calculator';
+      document.getElementById('block-nl').style.display = lang === 'nl' ? 'block' : 'none';
+      document.getElementById('block-en').style.display = lang === 'en' ? 'block' : 'none';
+      document.getElementById('btn-nl').classList.toggle('active', lang === 'nl');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('footer-about').textContent = lang === 'nl' ? 'Over ons' : 'About';
+      document.getElementById('footer-privacy').textContent = lang === 'nl' ? 'Privacybeleid' : 'Privacy Policy';
+      document.getElementById('footer-contact').textContent = 'Contact';
+      try { localStorage.setItem('loonhelder_lang', lang); } catch(e) {}
+    }
+    const saved = localStorage.getItem('loonhelder_lang') || 'nl';
+    setLang(saved);
+  </script>
+</body>
+</html>
