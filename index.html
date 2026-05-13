@@ -192,13 +192,27 @@
     </div>
 
     <script>
-      try {
-        const lang = localStorage.getItem('loonhelder_lang') || 'nl';
-        if (lang === 'en') {
-          document.getElementById('sc-nl').style.display = 'none';
-          document.getElementById('sc-en').style.display = 'block';
-        }
-      } catch(e) {}
+      function applyLang(lang) {
+        const nl = document.getElementById('sc-nl');
+        const en = document.getElementById('sc-en');
+        if (!nl || !en) return;
+        nl.style.display = lang === 'en' ? 'none' : 'block';
+        en.style.display = lang === 'en' ? 'block' : 'none';
+      }
+      // Apply on load from localStorage
+      try { applyLang(localStorage.getItem('loonhelder_lang') || 'nl'); } catch(e) {}
+      // Listen for language changes dispatched by the React app
+      window.addEventListener('loonhelder_lang_change', function(e) {
+        applyLang(e.detail);
+      });
+      // Poll localStorage as fallback (React app writes to it on lang switch)
+      let _lastLang = null;
+      setInterval(function() {
+        try {
+          const lang = localStorage.getItem('loonhelder_lang') || 'nl';
+          if (lang !== _lastLang) { _lastLang = lang; applyLang(lang); }
+        } catch(e) {}
+      }, 300);
     </script>
   </body>
 </html>
