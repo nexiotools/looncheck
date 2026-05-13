@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl" id="html-root">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Contact — LoonHelder</title>
+  <meta name="description" content="Neem contact op met LoonHelder. Vragen over de bruto netto calculator of salarisberekening?" />
+  <link rel="canonical" href="https://loonhelder.nl/contact.html" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --bg: #f5f3f0; --surface: #fff; --border: rgba(0,0,0,0.08); --text: #1a1a1a; --muted: #555; --faint: #999; --accent: #0e1631; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
+    .back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 14px; }
+    .back:hover { color: var(--text); }
+    .lang-toggle { display: flex; background: #e8e4de; border-radius: 8px; overflow: hidden; }
+    .lang-btn { padding: 6px 14px; font-size: 13px; font-weight: 600; border: none; background: transparent; cursor: pointer; color: var(--muted); font-family: system-ui, sans-serif; }
+    .lang-btn.active { background: var(--accent); color: #fff; border-radius: 6px; }
+    .kicker { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { font-size: clamp(26px, 5vw, 38px); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 20px; }
+    h2 { font-size: 17px; font-weight: 700; margin: 32px 0 10px; }
+    p { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 10px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; margin: 24px 0; }
+    .email-label { font-size: 12px; color: var(--faint); margin-bottom: 6px; }
+    .email-link { font-size: 20px; font-weight: 700; color: var(--accent); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+    footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    footer a { font-size: 13px; color: var(--faint); text-decoration: none; }
+    footer a:hover { color: var(--muted); }
+    .lang-block { display: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="/" class="back">← loonhelder.nl</a>
+      <div class="lang-toggle">
+        <button class="lang-btn" id="btn-nl" onclick="setLang('nl')">NL</button>
+        <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+      </div>
+    </div>
+
+    <!-- NL -->
+    <div class="lang-block" id="block-nl">
+      <p class="kicker">Contact</p>
+      <h1>Neem contact op</h1>
+      <p>LoonHelder is een product van Nexio Tools. Heb je een vraag over de calculator, een fout gevonden in een berekening, of een ander bericht? Stuur ons een e-mail.</p>
+      <div class="card">
+        <p class="email-label">E-mailadres</p>
+        <a href="mailto:nexio.tools@gmail.com" class="email-link">nexio.tools@gmail.com</a>
+      </div>
+      <h2>Klopt de berekening niet?</h2>
+      <p>Controleer of je de juiste instellingen hebt geselecteerd: het belastingjaar (2025 of 2026), loonheffingskorting aan of uit, en of vakantiegeld is meegenomen. Bij aanhoudende afwijkingen kun je ons een e-mail sturen met het bruto bedrag en de uitkomst die je verwacht.</p>
+      <h2>Over LoonHelder</h2>
+      <p>LoonHelder maakt deel uit van <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">Nexio Tools</a>, een collectie van slimme tools voor professionals. Andere tools zijn <a href="https://brieflyai.nl" target="_blank" rel="noopener noreferrer">BrieflyAI</a> (vergaderverslagen), <a href="https://craftcv.nl" target="_blank" rel="noopener noreferrer">CraftCV</a> (cv-optimalisatie) en <a href="https://contractclarity.nl" target="_blank" rel="noopener noreferrer">ContractClarity</a> (contractanalyse).</p>
+    </div>
+
+    <!-- EN -->
+    <div class="lang-block" id="block-en">
+      <p class="kicker">Contact</p>
+      <h1>Get in touch</h1>
+      <p>LoonHelder is a product of Nexio Tools. Do you have a question about the calculator, found an error in a calculation, or have another message? Send us an email.</p>
+      <div class="card">
+        <p class="email-label">Email address</p>
+        <a href="mailto:nexio.tools@gmail.com" class="email-link">nexio.tools@gmail.com</a>
+      </div>
+      <h2>Is the calculation incorrect?</h2>
+      <p>Check that you have selected the correct settings: the tax year (2025 or 2026), whether the loonheffingskorting (tax credit) is enabled, and whether holiday pay is included. If the discrepancy persists, send us an email with the gross amount and the result you expected.</p>
+      <h2>About LoonHelder</h2>
+      <p>LoonHelder is part of <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">Nexio Tools</a>, a collection of smart tools for professionals. Other tools include <a href="https://brieflyai.nl" target="_blank" rel="noopener noreferrer">BrieflyAI</a> (meeting debriefs), <a href="https://craftcv.nl" target="_blank" rel="noopener noreferrer">CraftCV</a> (CV optimisation), and <a href="https://contractclarity.nl" target="_blank" rel="noopener noreferrer">ContractClarity</a> (contract analysis).</p>
+    </div>
+
+    <hr />
+    <footer>
+      <a href="/">← loonhelder.nl</a>
+      <div style="display:flex;gap:20px;">
+        <a href="/privacy.html" id="footer-privacy">Privacybeleid</a>
+        <a href="/contact.html" id="footer-contact">Contact</a>
+        <a href="https://nexiotools.nl" target="_blank" rel="noopener noreferrer">Nexio Tools</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.getElementById('html-root').lang = lang;
+      document.getElementById('page-title').textContent = lang === 'nl' ? 'Contact — LoonHelder' : 'Contact — LoonHelder';
+      document.getElementById('block-nl').style.display = lang === 'nl' ? 'block' : 'none';
+      document.getElementById('block-en').style.display = lang === 'en' ? 'block' : 'none';
+      document.getElementById('btn-nl').classList.toggle('active', lang === 'nl');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.getElementById('footer-privacy').textContent = lang === 'nl' ? 'Privacybeleid' : 'Privacy Policy';
+      try { localStorage.setItem('loonhelder_lang', lang); } catch(e) {}
+    }
+    const saved = localStorage.getItem('loonhelder_lang') || 'nl';
+    setLang(saved);
+  </script>
+</body>
+</html>
